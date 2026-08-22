@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>TIMELOOP</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- HAUPTMENÜ -->
+  <section id="screen-menu" class="screen active">
+    <div class="menu-timeline-bg"><div class="menu-timeline-dot"></div></div>
+    <h1 class="logo">TIMELOOP</h1>
+    <p class="tagline">Ändere die Vergangenheit. Verändere die Zukunft.</p>
+    <nav class="menu-buttons">
+      <button id="btn-continue" class="btn btn-primary">▶ WEITERSPIELEN</button>
+      <button id="btn-newgame" class="btn">NEUES SPIEL</button>
+      <button id="btn-levels" class="btn">LEVELS</button>
+      <button id="btn-settings" class="btn">EINSTELLUNGEN</button>
+    </nav>
+  </section>
+
+  <!-- LEVELAUSWAHL -->
+  <section id="screen-levels" class="screen">
+    <header class="subheader">
+      <button class="btn-icon" data-back="screen-menu">←</button>
+      <h2>LEVELS</h2>
+    </header>
+    <div id="level-list" class="level-list"></div>
+  </section>
+
+  <!-- EINSTELLUNGEN -->
+  <section id="screen-settings" class="screen">
+    <header class="subheader">
+      <button class="btn-icon" data-back="screen-menu">←</button>
+      <h2>EINSTELLUNGEN</h2>
+    </header>
+    <div class="settings-list">
+      <label class="setting-row"><span>Sound</span><input type="checkbox" id="opt-sound" checked /></label>
+      <label class="setting-row"><span>Steuerung: Swipe für Zeit</span><input type="checkbox" id="opt-swipe" checked /></label>
+      <button id="btn-clear-save" class="btn btn-danger">FORTSCHRITT LÖSCHEN</button>
+    </div>
+  </section>
+
+  <!-- SPIEL -->
+  <section id="screen-game" class="screen">
+    <header class="game-header">
+      <button class="btn-icon" id="btn-exit-level">←</button>
+      <span id="level-title">Level</span>
+      <button class="btn-icon" id="btn-reset">RESET TIMELINE</button>
+    </header>
+
+    <div id="hint-banner" class="hint-banner"></div>
+
+    <div id="canvas-wrap">
+      <canvas id="game-canvas"></canvas>
+      <div id="win-overlay" class="win-overlay hidden">
+        <div class="win-card">
+          <h2>ZIEL ERREICHT</h2>
+          <div id="win-stars" class="win-stars">★★★</div>
+          <div id="win-stats" class="win-stats"></div>
+          <div class="win-buttons">
+            <button id="btn-win-retry" class="btn">NOCHMAL</button>
+            <button id="btn-win-next" class="btn btn-primary">WEITER</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ZEITLINIE -->
+    <div class="timeline-bar">
+      <button id="btn-rewind" class="time-btn">⏪</button>
+      <div id="timeline-track" class="timeline-track">
+        <div id="timeline-fill" class="timeline-fill"></div>
+        <div id="timeline-cursor" class="timeline-cursor"></div>
+      </div>
+      <button id="btn-forward" class="time-btn">⏩</button>
+    </div>
+    <div class="time-readout"><span id="time-label">GEGENWART</span></div>
+
+    <!-- STEUERUNG -->
+    <div class="controls-row">
+      <div class="dpad">
+        <button class="dpad-btn dpad-up" data-dx="0" data-dy="-1">▲</button>
+        <button class="dpad-btn dpad-left" data-dx="-1" data-dy="0">◀</button>
+        <button class="dpad-btn dpad-right" data-dx="1" data-dy="0">▶</button>
+        <button class="dpad-btn dpad-down" data-dx="0" data-dy="1">▼</button>
+      </div>
+      <button id="btn-interact" class="interact-btn">✋</button>
+    </div>
+  </section>
+
+<script src="levels.js"></script>
+<script src="engine.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
