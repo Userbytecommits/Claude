@@ -1,0 +1,39 @@
+name: Build Flutter Studio APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - claude/flutter-mobile-studio-npf6q6
+    paths:
+      - "flutter_studio/**"
+      - ".github/workflows/build_apk.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: flutter_studio
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Add Android platform scaffolding
+        run: flutter create --platforms=android .
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build release APK
+        run: flutter build apk --release --no-tree-shake-icons
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-studio-apk
+          path: flutter_studio/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 14
