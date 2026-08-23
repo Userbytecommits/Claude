@@ -15,9 +15,29 @@ class FlutterStudioApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Studio',
       debugShowCheckedModeBanner: false,
+      themeMode: ThemeMode.system,
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.indigo,
+        brightness: Brightness.light,
+        appBarTheme: const AppBarTheme(centerTitle: false, elevation: 0),
+        cardTheme: CardTheme(
+          elevation: 1,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        ),
+        inputDecorationTheme: const InputDecorationTheme(
+          filled: true,
+        ),
+      ),
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        colorSchemeSeed: Colors.indigo,
+        brightness: Brightness.dark,
+        appBarTheme: const AppBarTheme(centerTitle: false, elevation: 0),
+        cardTheme: CardTheme(
+          elevation: 1,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        ),
       ),
       home: const AuthGate(),
     );

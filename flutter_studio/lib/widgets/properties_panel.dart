@@ -27,6 +27,9 @@ class PropertiesPanel extends StatelessWidget {
   final ValueChanged<CanvasElement> onChange;
   final VoidCallback onDelete;
   final VoidCallback onClose;
+  final VoidCallback onDuplicate;
+  final VoidCallback onBringToFront;
+  final VoidCallback onSendToBack;
 
   const PropertiesPanel({
     super.key,
@@ -34,6 +37,9 @@ class PropertiesPanel extends StatelessWidget {
     required this.onChange,
     required this.onDelete,
     required this.onClose,
+    required this.onDuplicate,
+    required this.onBringToFront,
+    required this.onSendToBack,
   });
 
   void _setProp(String key, dynamic value) {
@@ -58,7 +64,23 @@ class PropertiesPanel extends StatelessWidget {
               ),
               Expanded(
                 child: Text('Einstellungen: ${element.type}',
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis),
+              ),
+              IconButton(
+                icon: const Icon(Icons.copy_rounded),
+                tooltip: 'Duplizieren',
+                onPressed: onDuplicate,
+              ),
+              IconButton(
+                icon: const Icon(Icons.flip_to_front),
+                tooltip: 'Nach vorne',
+                onPressed: onBringToFront,
+              ),
+              IconButton(
+                icon: const Icon(Icons.flip_to_back),
+                tooltip: 'Nach hinten',
+                onPressed: onSendToBack,
               ),
               IconButton(
                 icon: const Icon(Icons.delete_outline, color: Colors.red),

@@ -71,6 +71,7 @@ class CanvasElement {
 class CatalogItem {
   final String type;
   final String label;
+  final String category;
   final int iconCodePoint;
   final double defaultWidth;
   final double defaultHeight;
@@ -79,6 +80,7 @@ class CatalogItem {
   const CatalogItem({
     required this.type,
     required this.label,
+    required this.category,
     required this.iconCodePoint,
     required this.defaultWidth,
     required this.defaultHeight,
