@@ -1,11 +1,15 @@
 package com.localai.assistant.ui
 
+import android.app.AlertDialog
 import android.app.role.RoleManager
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.view.Gravity
+import android.widget.EditText
+import android.widget.LinearLayout
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -48,6 +52,8 @@ class MainActivity : AppCompatActivity() {
             pickModel.launch(arrayOf("*/*"))
         }
 
+        binding.btnDownloadModel.setOnClickListener { showDownloadModelDialog() }
+
         binding.btnAccessibility.setOnClickListener {
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         }
@@ -64,6 +70,45 @@ class MainActivity : AppCompatActivity() {
 
         val engine = AssistantApplication.from(this).engine
         binding.txtStatus.text = if (engine.isLoaded) "Model loaded." else getString(com.localai.assistant.R.string.hint_model_missing)
+    }
+
+    private fun showDownloadModelDialog() {
+        val padding = (16 * resources.displayMetrics.density).toInt()
+        val urlInput = EditText(this).apply { hint = getString(com.localai.assistant.R.string.dialog_download_url_hint) }
+        val tokenInput = EditText(this).apply { hint = getString(com.localai.assistant.R.string.dialog_download_token_hint) }
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(padding, padding, padding, padding)
+            gravity = Gravity.CENTER_HORIZONTAL
+            addView(urlInput)
+            addView(tokenInput)
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle(com.localai.assistant.R.string.dialog_download_title)
+            .setView(container)
+            .setPositiveButton(com.localai.assistant.R.string.btn_download_model) { _, _ ->
+                val url = urlInput.text.toString().trim()
+                val token = tokenInput.text.toString().trim().ifBlank { null }
+                if (url.isNotBlank()) downloadModel(url, token)
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun downloadModel(url: String, token: String?) {
+        val engine = AssistantApplication.from(this).engine
+        lifecycleScope.launch {
+            val result = engine.downloadAndLoadModel(url, token) { read, total ->
+                val percent = if (total > 0) " (${read * 100 / total}%)" else ""
+                runOnUiThread { binding.txtStatus.text = "Downloading model$percent…" }
+            }
+            binding.txtStatus.text = if (result.isSuccess) {
+                "Model downloaded and loaded."
+            } else {
+                "Download failed: ${result.exceptionOrNull()?.message}"
+            }
+        }
     }
 
     private fun requestAssistantRole() {

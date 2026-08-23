@@ -35,17 +35,27 @@ Two Android platform rules apply to every third-party app, including this one:
 ## Getting a model file
 
 MediaPipe's LLM Inference API needs a `.task` bundle, not a raw checkpoint.
-
-1. Get a Gemma 3n (E2B/E4B) `.task` file, e.g. from Google's
-   [MediaPipe Gemma model page on Kaggle](https://www.kaggle.com/models/google/gemma-3n) —
-   pick the **MediaPipe / `.task`** variant. You must accept Google's model
-   license there.
-2. Copy it to the phone (e.g. `adb push gemma3n.task /sdcard/Download/`).
-3. In the app, tap **"Load model"** and pick the file — it's copied into the
-   app's private storage and loaded once.
-
 The model file is intentionally *not* bundled in this repo (it's multiple GB
-and under its own license).
+and under its own license). Three ways to get one into this app:
+
+**A) You already downloaded it in Google's "AI Edge Gallery" app.**
+Tap **"Load model"** here and, in the system file picker, navigate to
+`Internal storage > Android > data > com.google.ai.edge.gallery > files`
+(the exact sub-path can vary) and pick the `.task` file. The system file
+picker (unlike a regular app) is allowed to browse into another app's
+`Android/data` folder even on scoped-storage Android versions, so this
+usually works without root.
+
+**B) Use the in-app "Download model" button.** Paste the *direct* `.task`
+file URL (open the model's Hugging Face page, e.g. under
+`litert-community/...` or `google/...`, go to **Files**, and copy the link
+behind the download icon for the `.task` file) and, since every current
+Gemma release is a gated model, your Hugging Face **access token** (Hugging
+Face account → Settings → Access Tokens). The app downloads it straight into
+its own storage and loads it — no Gallery app needed.
+
+**C) adb.** `adb push your-model.task /sdcard/Download/model.task`, then
+pick it from Downloads via "Load model".
 
 ## Building the APK
 

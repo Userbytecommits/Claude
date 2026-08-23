@@ -7,6 +7,7 @@ import com.google.mediapipe.tasks.genai.llminference.LlmInference.LlmInferenceOp
 import com.google.mediapipe.tasks.genai.llminference.LlmInferenceSession
 import com.google.mediapipe.tasks.genai.llminference.LlmInferenceSession.LlmInferenceSessionOptions
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.coroutines.resume
@@ -35,6 +36,22 @@ class GemmaInferenceEngine(private val context: Context) {
         } ?: error("Could not open the selected model file")
 
         loadModelFromPath(localFile.absolutePath)
+    }
+
+    /**
+     * Downloads a `.task` model directly from a URL (fallback for when another app's
+     * download can't be reached via the file picker) and loads it once complete.
+     */
+    suspend fun downloadAndLoadModel(
+        url: String,
+        accessToken: String?,
+        onProgress: (bytesRead: Long, totalBytes: Long) -> Unit,
+    ): Result<Unit> {
+        val destination = File(context.filesDir, "model.task")
+        val downloadResult = ModelDownloader.download(url, accessToken, destination, onProgress)
+        return withContext(kotlinx.coroutines.Dispatchers.IO) {
+            downloadResult.mapCatching { loadModelFromPath(it.absolutePath) }
+        }
     }
 
     /** Loads directly from an absolute path, e.g. a file already pushed via adb. */
