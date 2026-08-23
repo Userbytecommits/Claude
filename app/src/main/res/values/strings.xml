@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Local Assistant</string>
+    <string name="accessibility_service_label">Local Assistant Device Control</string>
+    <string name="accessibility_service_description">Allows the local assistant to read on-screen content and perform taps/gestures/settings changes that you ask for. Everything runs on-device; nothing is sent anywhere.</string>
+    <string name="hint_model_missing">No model loaded yet. Tap \"Load model\" and pick your Gemma .task file.</string>
+    <string name="btn_load_model">Load model</string>
+    <string name="btn_send">Send</string>
+    <string name="input_hint">Ask the assistant…</string>
+    <string name="btn_grant_accessibility">Enable device control (Accessibility)</string>
+    <string name="btn_grant_notifications">Enable notification reading</string>
+    <string name="btn_make_default_assistant">Set as default Assistant app</string>
+</resources>
