@@ -7,7 +7,7 @@
     <string name="btn_load_model">Load model</string>
     <string name="btn_find_model">Find model on device</string>
     <string name="dialog_find_model_title">Pick a found .task file</string>
-    <string name="find_model_none_found">No .task file found. Grant \"All files access\" when asked, then check the AI Edge Gallery app actually finished downloading it.</string>
+    <string name="find_model_none_found">No model file (150 MB+) found. Checked: %1$s. Open the AI Edge Gallery app and confirm the download actually finished (it should say \"Try it\", not just a percentage), or use \"Download model\"/adb instead.</string>
     <string name="find_model_need_permission">Needs \"All files access\" permission - opening Settings…</string>
     <string name="btn_download_model">Download model</string>
     <string name="dialog_download_title">Download .task model</string>

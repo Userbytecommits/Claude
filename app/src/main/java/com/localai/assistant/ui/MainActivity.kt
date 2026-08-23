@@ -87,7 +87,7 @@ class MainActivity : AppCompatActivity() {
     private fun hasAllFilesAccess(): Boolean =
         Build.VERSION.SDK_INT < Build.VERSION_CODES.R || Environment.isExternalStorageManager()
 
-    /** Scans for `.task` files other apps (e.g. AI Edge Gallery) left in shared storage. */
+    /** Scans for large model files other apps (e.g. AI Edge Gallery) left in shared storage. */
     private fun findModelOnDevice() {
         if (!hasAllFilesAccess()) {
             binding.txtStatus.text = getString(com.localai.assistant.R.string.find_model_need_permission)
@@ -102,16 +102,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun scanForModelFiles() {
-        binding.txtStatus.text = "Searching for .task files…"
+        binding.txtStatus.text = "Searching for large model files…"
         lifecycleScope.launch {
-            val found = ModelFileScanner.findTaskFiles()
-            if (found.isEmpty()) {
-                binding.txtStatus.text = getString(com.localai.assistant.R.string.find_model_none_found)
-                return@launch
+            val result = ModelFileScanner.scan()
+            val found = when (result) {
+                is ModelFileScanner.ScanResult.NoPermission -> {
+                    binding.txtStatus.text = getString(com.localai.assistant.R.string.find_model_need_permission)
+                    return@launch
+                }
+                is ModelFileScanner.ScanResult.NothingFound -> {
+                    binding.txtStatus.text = getString(
+                        com.localai.assistant.R.string.find_model_none_found,
+                        result.scannedDirs.joinToString(", ").ifBlank { "(no matching folders exist)" },
+                    )
+                    return@launch
+                }
+                is ModelFileScanner.ScanResult.Found -> result.files
             }
             AlertDialog.Builder(this@MainActivity)
                 .setTitle(com.localai.assistant.R.string.dialog_find_model_title)
-                .setItems(found.map { it.absolutePath }.toTypedArray()) { _, index ->
+                .setItems(found.map { "${it.name} (${it.length() / (1024 * 1024)} MB)\n${it.absolutePath}" }.toTypedArray()) { _, index ->
                     loadModelFromPath(found[index].absolutePath)
                 }
                 .setNegativeButton(android.R.string.cancel, null)
