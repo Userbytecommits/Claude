@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.provider.Settings
 import android.view.Gravity
 import android.widget.EditText
@@ -17,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.localai.assistant.AssistantApplication
 import com.localai.assistant.control.ActionExecutor
 import com.localai.assistant.databinding.ActivityMainBinding
+import com.localai.assistant.llm.ModelFileScanner
 import kotlinx.coroutines.launch
 
 /**
@@ -28,6 +30,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var adapter: ChatAdapter
+    private var pendingFindModelScan = false
 
     private val pickModel = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
         if (uri == null) return@registerForActivityResult
@@ -53,6 +56,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnDownloadModel.setOnClickListener { showDownloadModelDialog() }
+        binding.btnFindModel.setOnClickListener { findModelOnDevice() }
 
         binding.btnAccessibility.setOnClickListener {
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
@@ -70,6 +74,61 @@ class MainActivity : AppCompatActivity() {
 
         val engine = AssistantApplication.from(this).engine
         binding.txtStatus.text = if (engine.isLoaded) "Model loaded." else getString(com.localai.assistant.R.string.hint_model_missing)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (pendingFindModelScan && hasAllFilesAccess()) {
+            pendingFindModelScan = false
+            scanForModelFiles()
+        }
+    }
+
+    private fun hasAllFilesAccess(): Boolean =
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.R || Environment.isExternalStorageManager()
+
+    /** Scans for `.task` files other apps (e.g. AI Edge Gallery) left in shared storage. */
+    private fun findModelOnDevice() {
+        if (!hasAllFilesAccess()) {
+            binding.txtStatus.text = getString(com.localai.assistant.R.string.find_model_need_permission)
+            pendingFindModelScan = true
+            val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
+                data = Uri.parse("package:$packageName")
+            }
+            startActivity(intent)
+            return
+        }
+        scanForModelFiles()
+    }
+
+    private fun scanForModelFiles() {
+        binding.txtStatus.text = "Searching for .task files…"
+        lifecycleScope.launch {
+            val found = ModelFileScanner.findTaskFiles()
+            if (found.isEmpty()) {
+                binding.txtStatus.text = getString(com.localai.assistant.R.string.find_model_none_found)
+                return@launch
+            }
+            AlertDialog.Builder(this@MainActivity)
+                .setTitle(com.localai.assistant.R.string.dialog_find_model_title)
+                .setItems(found.map { it.absolutePath }.toTypedArray()) { _, index ->
+                    loadModelFromPath(found[index].absolutePath)
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
+        }
+    }
+
+    private fun loadModelFromPath(path: String) {
+        binding.txtStatus.text = "Loading model…"
+        lifecycleScope.launch {
+            val result = kotlin.runCatching {
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                    AssistantApplication.from(this@MainActivity).engine.loadModelFromPath(path)
+                }
+            }
+            binding.txtStatus.text = if (result.isSuccess) "Model loaded." else "Failed: ${result.exceptionOrNull()?.message}"
+        }
     }
 
     private fun showDownloadModelDialog() {

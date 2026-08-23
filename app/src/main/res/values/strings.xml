@@ -5,6 +5,10 @@
     <string name="accessibility_service_description">Allows the local assistant to read on-screen content and perform taps/gestures/settings changes that you ask for. Everything runs on-device; nothing is sent anywhere.</string>
     <string name="hint_model_missing">No model loaded yet. Tap \"Load model\" and pick your Gemma .task file.</string>
     <string name="btn_load_model">Load model</string>
+    <string name="btn_find_model">Find model on device</string>
+    <string name="dialog_find_model_title">Pick a found .task file</string>
+    <string name="find_model_none_found">No .task file found. Grant \"All files access\" when asked, then check the AI Edge Gallery app actually finished downloading it.</string>
+    <string name="find_model_need_permission">Needs \"All files access\" permission - opening Settings…</string>
     <string name="btn_download_model">Download model</string>
     <string name="dialog_download_title">Download .task model</string>
     <string name="dialog_download_url_hint">Direct .task file URL</string>

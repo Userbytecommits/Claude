@@ -38,21 +38,25 @@ MediaPipe's LLM Inference API needs a `.task` bundle, not a raw checkpoint.
 The model file is intentionally *not* bundled in this repo (it's multiple GB
 and under its own license). Three ways to get one into this app:
 
-**A) You already downloaded it in Google's "AI Edge Gallery" app.**
-Tap **"Load model"** here and, in the system file picker, navigate to
-`Internal storage > Android > data > com.google.ai.edge.gallery > files`
-(the exact sub-path can vary) and pick the `.task` file. The system file
-picker (unlike a regular app) is allowed to browse into another app's
-`Android/data` folder even on scoped-storage Android versions, so this
-usually works without root.
+**A) You already downloaded it in Google's "AI Edge Gallery" app (no URL needed).**
+Tap **"Find model on device"**. The first tap sends you to the *All files
+access* settings screen for this app - turn it on and come back (the app
+resumes the scan automatically). It then searches
+`Android/data/com.google.ai.edge.gallery/...` (and Downloads/Documents) for
+any `.task` file and lists what it found; tap one to load it. This is the
+recommended path since it needs nothing from you except granting that one
+permission - no URL, no token, no adb.
 
-**B) Use the in-app "Download model" button.** Paste the *direct* `.task`
-file URL (open the model's Hugging Face page, e.g. under
-`litert-community/...` or `google/...`, go to **Files**, and copy the link
-behind the download icon for the `.task` file) and, since every current
-Gemma release is a gated model, your Hugging Face **access token** (Hugging
-Face account → Settings → Access Tokens). The app downloads it straight into
-its own storage and loads it — no Gallery app needed.
+If the file picker route is more convenient on your device instead: tap
+**"Load model"** and, in the system picker, navigate to
+`Internal storage > Android > data > com.google.ai.edge.gallery > files`
+(sub-path may vary) - the *picker* can browse into another app's
+`Android/data` folder even without the permission above, on most stock
+Android builds.
+
+**B) Use the in-app "Download model" button.** Only needed if you have a
+direct `.task` URL (e.g. from a model's Hugging Face **Files** tab) and,
+since every current Gemma release is gated, your Hugging Face access token.
 
 **C) adb.** `adb push your-model.task /sdcard/Download/model.task`, then
 pick it from Downloads via "Load model".
