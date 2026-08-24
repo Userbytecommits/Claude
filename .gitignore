@@ -1,0 +1,49 @@
+# Gradle
+.gradle/
+build/
+gradle-app.setting
+!gradle-wrapper.jar
+.gradletasknamecache
+
+# Idea
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Android
+local.properties
+.DS_Store
+captures/
+*.apk
+*.ap_
+*.dex
+*.class
+bin/
+gen/
+lint.xml
+
+# Editor backups
+*~
+*.swp
+*.swo
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Maven
+target/
+
+# Logs
+*.log
+
+# Node (for editor dependencies if needed)
+node_modules/
+package-lock.json
