@@ -8,8 +8,8 @@ import android.view.MotionEvent
 import android.view.SurfaceView
 import android.view.SurfaceHolder
 import dev.game.engine.core.GameEngine
-import dev.game.engine.core.Scene
-import dev.game.engine.utils.Vector2
+import dev.game.engine.graphics.Renderer
+import dev.game.engine.graphics.SpriteComponent
 import kotlin.math.max
 
 class GameSurfaceView(context: Context, attrs: AttributeSet? = null) : SurfaceView(context, attrs),
@@ -17,7 +17,7 @@ class GameSurfaceView(context: Context, attrs: AttributeSet? = null) : SurfaceVi
 
     private var gameEngine: GameEngine? = null
     private var renderThread: RenderThread? = null
-    private var lastTouchTime = 0L
+    private val renderer = Renderer()
 
     init {
         holder.addCallback(this)
@@ -38,7 +38,9 @@ class GameSurfaceView(context: Context, attrs: AttributeSet? = null) : SurfaceVi
         }
     }
 
-    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {}
+    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
+        renderer.camera.setViewport(width.toFloat(), height.toFloat())
+    }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {
         gameEngine?.stop()
@@ -89,7 +91,6 @@ class GameSurfaceView(context: Context, attrs: AttributeSet? = null) : SurfaceVi
                     val canvas = holder.lockCanvas()
                     if (canvas != null) {
                         synchronized(holder) {
-                            canvas.drawColor(Color.BLACK)
                             renderGame(canvas)
                         }
                         holder.unlockCanvasAndPost(canvas)
@@ -113,28 +114,26 @@ class GameSurfaceView(context: Context, attrs: AttributeSet? = null) : SurfaceVi
         }
 
         private fun renderGame(canvas: Canvas) {
+            renderer.beginFrame(canvas)
+
             val scene = engine.getCurrentScene() ?: return
             val entities = scene.getEntities()
 
-            entities.forEach { entity ->
-                val spriteComponent = entity.getComponent<dev.game.engine.graphics.SpriteComponent>()
-                if (spriteComponent != null && entity.active) {
-                    // Simple circle rendering for now (visual placeholder)
-                    val paint = android.graphics.Paint().apply {
-                        color = spriteComponent.tintColor
-                    }
-
-                    val radius = 32f
-                    canvas.drawCircle(entity.position.x, entity.position.y, radius, paint)
-
-                    // Draw entity name as debug info
-                    val textPaint = android.graphics.Paint().apply {
-                        color = Color.WHITE
-                        textSize = 20f
-                    }
-                    canvas.drawText(entity.name, entity.position.x - 20, entity.position.y + 50, textPaint)
+            entities.filter { it.active && !it.isDestroyed() }.forEach { entity ->
+                val spriteComponent = entity.getComponent<SpriteComponent>()
+                if (spriteComponent != null) {
+                    renderer.queueSprite(entity, spriteComponent)
                 }
             }
+
+            renderer.endFrame(canvas)
+
+            // Draw FPS counter
+            val paint = android.graphics.Paint().apply {
+                color = Color.WHITE
+                textSize = 40f
+            }
+            canvas.drawText("FPS: 60", 50f, 50f, paint)
         }
     }
 }
