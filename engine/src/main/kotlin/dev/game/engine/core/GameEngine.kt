@@ -1,7 +1,6 @@
 package dev.game.engine.core
 
 import android.content.Context
-import android.view.SurfaceView
 import dev.game.engine.physics.PhysicsWorld
 
 class GameEngine(val context: Context) {
@@ -12,6 +11,8 @@ class GameEngine(val context: Context) {
 
     val inputManager = InputManager()
     val physicsWorld = PhysicsWorld()
+    val eventSystem = EventSystem()
+    val gameState = GameState()
 
     private var lastFrameTime = System.currentTimeMillis()
 
@@ -24,6 +25,7 @@ class GameEngine(val context: Context) {
     fun loadScene(scene: Scene) {
         currentScene?.clear()
         currentScene = scene
+        eventSystem.publish("scene_loaded", SceneLoadedEvent(scene))
     }
 
     fun start() {
@@ -65,5 +67,7 @@ class GameEngine(val context: Context) {
         stop()
         currentScene?.clear()
         currentScene = null
+        eventSystem.clear()
+        gameState.clear()
     }
 }
