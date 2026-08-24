@@ -7,10 +7,9 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 /**
- * Fallback for when the model can't be picked up from another app's storage via the
- * system file picker (e.g. an OEM file picker that refuses to browse into
- * `Android/data/<package>`): downloads a `.task` model file directly from a URL the user
- * pastes in (the "Copy link" / "download" link from the model's Hugging Face page).
+ * Downloads a `.litertlm` (or `.task`, for older Gemma 3n releases) model file directly
+ * from a Hugging Face URL, so the app doesn't depend on another app (e.g. AI Edge Gallery)
+ * having already downloaded a copy the user can find.
  *
  * Gated models (all current Gemma releases) require the request to carry the user's own
  * Hugging Face access token; without one the download will fail with a 401/403, which is

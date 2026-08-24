@@ -1,17 +1,18 @@
 # Local Gemini-style Assistant (Android)
 
-An Android app that runs **Gemma locally on-device** (via Google's MediaPipe LLM
-Inference API) and behaves like the Gemini/Google Assistant app on Pixel phones:
-it can be set as the phone's default Assistant, answer questions, read your
-notifications, read what's on screen, and open/change system settings — all
-without any network call. The model, the prompt, and everything it reads about
-your phone stay on the device.
+An Android app that runs **Gemma locally on-device** (via Google's LiteRT-LM runtime -
+the same one the official "AI Edge Gallery" app uses) and behaves like the
+Gemini/Google Assistant app on Pixel phones: it can be set as the phone's default
+Assistant, answer questions, read your notifications, read what's on screen, and
+open/change system settings — all without any network call once a model is loaded.
+The model, the prompt, and everything it reads about your phone stay on the device.
+Requires Android 12+ (minSdk 31) - same requirement as LiteRT-LM/AI Edge Gallery.
 
 ## What's included
 
 | Piece | File | Role |
 |---|---|---|
-| On-device inference | `llm/GemmaInferenceEngine.kt` | Loads a Gemma `.task` model with MediaPipe's `LlmInference`/`LlmInferenceSession` and runs multi-turn chat, fully offline. |
+| On-device inference | `llm/GemmaInferenceEngine.kt` | Loads a Gemma `.litertlm` model with Google's LiteRT-LM `Engine`/`Conversation` API and runs multi-turn chat, fully offline. |
 | Chat UI | `ui/MainActivity.kt`, `ui/ChatAdapter.kt` | Load the model file, grant permissions, and chat directly. |
 | System Assistant role | `assistant/AssistantSessionService.kt`, `AssistantSessionServiceImpl.kt`, `AssistantSession.kt` | Registers the app so it can be picked in *Settings > Apps > Default apps > Digital assistant app*, and shows an overlay session (like Gemini's sheet) when invoked. |
 | Device control | `accessibility/DeviceControlAccessibilityService.kt` | AccessibilityService: reads on-screen text, taps a labeled element, presses back/home/recents, opens Quick Settings/notification shade. |
@@ -34,39 +35,37 @@ Two Android platform rules apply to every third-party app, including this one:
 
 ## Getting a model file
 
-MediaPipe's LLM Inference API needs a `.task` bundle, not a raw checkpoint.
-The model file is intentionally *not* bundled in this repo (it's multiple GB
-and under its own license). Three ways to get one into this app:
+LiteRT-LM needs a `.litertlm` bundle (older Gemma 3n releases used `.task` -
+also supported). The model file is intentionally *not* bundled in this repo
+(it's multiple GB and gated behind Google's model license on Hugging Face).
 
-**A) You already downloaded it in Google's "AI Edge Gallery" app (no URL needed).**
-Tap **"Find model on device"**. The first tap sends you to the *All files
-access* settings screen for this app - turn it on and come back (the app
-resumes the scan automatically). It then searches
-`Android/data/com.google.ai.edge.gallery/...` (and Downloads/Documents) for
-any `.task` file and lists what it found; tap one to load it. This is the
-recommended path since it needs nothing from you except granting that one
-permission - no URL, no token, no adb.
+**Recommended: the in-app "Download model" button.** It fetches the model
+directly from Hugging Face - no need to hunt for a URL, no dependency on
+another app having downloaded it first. It's prefilled with the exact repo/file
+the AI Edge Gallery app itself uses for **Gemma 4 E2B-it**
+(`litert-community/gemma-4-E2B-it-litert-lm` / `gemma-4-E2B-it.litertlm`, confirmed
+by reading that app's own source); swap the repo id for another Gemma variant if
+you want a different size. You only need a free Hugging Face account:
 
-If the file picker route is more convenient on your device instead: tap
-**"Load model"** and, in the system picker, navigate to
-`Internal storage > Android > data > com.google.ai.edge.gallery > files`
-(sub-path may vary) - the *picker* can browse into another app's
-`Android/data` folder even without the permission above, on most stock
-Android builds.
+1. Open the repo's page on huggingface.co (e.g.
+   `https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm`) and
+   accept Gemma's license if prompted.
+2. Create an access token: Hugging Face → Settings → Access Tokens → New token
+   (read access is enough).
+3. In the app, tap **"Download model"**, leave the repo/filename as they are
+   (or change them for a different variant), paste the token, confirm.
 
-**B) Use the in-app "Download model" button.** Only needed if you have a
-direct `.task` URL (e.g. from a model's Hugging Face **Files** tab) and,
-since every current Gemma release is gated, your Hugging Face access token.
-
-**C) adb.** `adb push your-model.task /sdcard/Download/model.task`, then
-pick it from Downloads via "Load model".
+**Alternative: adb**, if you'd rather push a file you already have locally:
+`adb push your-model.litertlm /sdcard/Download/model.litertlm`, then pick it
+from Downloads via **"Load model"**.
 
 ## Building the APK
 
 This sandbox has no network access to Google's Maven repository
-(`dl.google.com`), so the Android Gradle Plugin and the AndroidX/MediaPipe
-dependencies could not be downloaded or compiled here. The Gradle wrapper
-(`./gradlew`) is already committed. To build:
+(`dl.google.com`), so the Android Gradle Plugin and the AndroidX/LiteRT-LM
+dependencies could not be downloaded or compiled here (CI builds it instead,
+see `.github/workflows/build_apk.yml`). The Gradle wrapper (`./gradlew`) is
+already committed. To build locally:
 
 ```bash
 # Requires Android Studio (or the Android SDK + JDK 17) with normal internet access
@@ -80,7 +79,8 @@ it will fetch the SDK/dependencies and let you run "Build > Build APK(s)".
 
 ## First-run setup on the phone
 
-1. Install the APK, open it, tap **Load model** and pick your `.task` file.
+1. Install the APK, open it, tap **Download model** (see above) or **Load model**
+   to pick a `.litertlm` file already on your device.
 2. Tap **"Enable device control (Accessibility)"** and turn the service on.
 3. Grant notification access via *Settings > Apps > Special app access >
    Notification access* (a shortcut for this can be wired to a button the

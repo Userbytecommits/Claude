@@ -2,10 +2,18 @@ package com.localai.assistant.llm
 
 import android.content.Context
 import android.net.Uri
-import com.google.mediapipe.tasks.genai.llminference.LlmInference
-import com.google.mediapipe.tasks.genai.llminference.LlmInference.LlmInferenceOptions
-import com.google.mediapipe.tasks.genai.llminference.LlmInferenceSession
-import com.google.mediapipe.tasks.genai.llminference.LlmInferenceSession.LlmInferenceSessionOptions
+import com.google.ai.edge.litertlm.Backend
+import com.google.ai.edge.litertlm.Content
+import com.google.ai.edge.litertlm.Contents
+import com.google.ai.edge.litertlm.Conversation
+import com.google.ai.edge.litertlm.ConversationConfig
+import com.google.ai.edge.litertlm.Engine
+import com.google.ai.edge.litertlm.EngineConfig
+import com.google.ai.edge.litertlm.ExperimentalApi
+import com.google.ai.edge.litertlm.Message
+import com.google.ai.edge.litertlm.MessageCallback
+import com.google.ai.edge.litertlm.SamplerConfig
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -13,24 +21,26 @@ import java.io.FileOutputStream
 import kotlin.coroutines.resume
 
 /**
- * Thin wrapper around MediaPipe's on-device LLM Inference API, used to run a locally
- * converted Gemma `.task` model (e.g. Gemma 3n E2B-it) fully offline: no network calls,
- * the prompt and the model weights never leave the device.
+ * Thin wrapper around Google's LiteRT-LM runtime - the same one the official "AI Edge
+ * Gallery" app uses - to run a locally downloaded Gemma `.litertlm` model (e.g.
+ * Gemma 4 E2B-it) fully offline: no network calls, the prompt and the model weights
+ * never leave the device.
  *
- * The model file itself is NOT bundled in the APK (it is several GB and subject to its
- * own license on Kaggle/Hugging Face). The user picks it once via SAF; see MainActivity.
+ * The model file itself is NOT bundled in the APK (it is multiple GB and gated behind
+ * Google's model license on Hugging Face). See [ModelDownloader] / MainActivity for how
+ * the user gets one in.
  */
 class GemmaInferenceEngine(private val context: Context) {
 
-    private var llmInference: LlmInference? = null
-    private var session: LlmInferenceSession? = null
+    private var engine: Engine? = null
+    private var conversation: Conversation? = null
 
     val isLoaded: Boolean
-        get() = llmInference != null
+        get() = engine != null
 
-    /** Copies the user-picked .task file into app-private storage and loads it. */
+    /** Copies the user-picked model file into app-private storage and loads it. */
     suspend fun loadModel(modelUri: Uri): Result<Unit> = runCatching {
-        val localFile = File(context.filesDir, "model.task")
+        val localFile = File(context.filesDir, "model.litertlm")
         context.contentResolver.openInputStream(modelUri)?.use { input ->
             FileOutputStream(localFile).use { output -> input.copyTo(output) }
         } ?: error("Could not open the selected model file")
@@ -39,59 +49,70 @@ class GemmaInferenceEngine(private val context: Context) {
     }
 
     /**
-     * Downloads a `.task` model directly from a URL (fallback for when another app's
-     * download can't be reached via the file picker) and loads it once complete.
+     * Downloads a `.litertlm` model directly from a URL and loads it once complete.
      */
     suspend fun downloadAndLoadModel(
         url: String,
         accessToken: String?,
         onProgress: (bytesRead: Long, totalBytes: Long) -> Unit,
     ): Result<Unit> {
-        val destination = File(context.filesDir, "model.task")
+        val destination = File(context.filesDir, "model.litertlm")
         val downloadResult = ModelDownloader.download(url, accessToken, destination, onProgress)
-        return withContext(kotlinx.coroutines.Dispatchers.IO) {
+        return withContext(Dispatchers.IO) {
             downloadResult.mapCatching { loadModelFromPath(it.absolutePath) }
         }
     }
 
     /** Loads directly from an absolute path, e.g. a file already pushed via adb. */
+    @OptIn(ExperimentalApi::class)
     fun loadModelFromPath(path: String) {
         close()
-        val options = LlmInferenceOptions.builder()
-            .setModelPath(path)
-            .setMaxTokens(1024)
-            .build()
-        val inference = LlmInference.createFromOptions(context, options)
-        val sessionOptions = LlmInferenceSessionOptions.builder()
-            .setTemperature(0.7f)
-            .setTopK(40)
-            .build()
-        llmInference = inference
-        session = LlmInferenceSession.createFromOptions(inference, sessionOptions)
+        val engineConfig = EngineConfig(
+            modelPath = path,
+            backend = Backend.CPU(),
+            maxNumTokens = 1024,
+        )
+        val newEngine = Engine(engineConfig)
+        newEngine.initialize()
+        val newConversation = newEngine.createConversation(
+            ConversationConfig(
+                samplerConfig = SamplerConfig(topK = 40, topP = 0.9, temperature = 0.7),
+            )
+        )
+        engine = newEngine
+        conversation = newConversation
     }
 
-    /**
-     * Runs one turn of the conversation and returns the full response.
-     * [systemPrompt] is prepended only on the very first call of a fresh session.
-     */
+    /** Runs one turn of the conversation and returns the full response. */
     suspend fun generate(prompt: String): String = suspendCancellableCoroutine { cont ->
-        val activeSession = session ?: run {
-            cont.resume("The model is not loaded yet. Tap \"Load model\" first.")
+        val activeConversation = conversation ?: run {
+            cont.resume("The model is not loaded yet. Load a model first.")
             return@suspendCancellableCoroutine
         }
-        try {
-            activeSession.addQueryChunk(prompt)
-            val result = activeSession.generateResponse()
-            cont.resume(result)
-        } catch (t: Throwable) {
-            cont.resume("Inference error: ${t.message}")
-        }
+        val sb = StringBuilder()
+        activeConversation.sendMessageAsync(
+            Contents.of(listOf(Content.Text(prompt))),
+            object : MessageCallback {
+                override fun onMessage(message: Message) {
+                    sb.append(message.toString())
+                }
+
+                override fun onDone() {
+                    if (cont.isActive) cont.resume(sb.toString())
+                }
+
+                override fun onError(throwable: Throwable) {
+                    if (cont.isActive) cont.resume("Inference error: ${throwable.message}")
+                }
+            },
+            emptyMap(),
+        )
     }
 
     fun close() {
-        session?.close()
-        llmInference?.close()
-        session = null
-        llmInference = null
+        conversation?.close()
+        engine?.close()
+        conversation = null
+        engine = null
     }
 }

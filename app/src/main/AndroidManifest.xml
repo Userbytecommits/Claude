@@ -3,19 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!--
-        INTERNET is only used for the optional one-time "Download model" fallback
-        (ModelDownloader). Inference itself never makes a network call: once a .task
-        file is loaded, everything runs on-device.
+        INTERNET is only used for the "Download model" feature (ModelDownloader), which
+        fetches the model straight from Hugging Face. Inference itself never makes a
+        network call: once a model is loaded, everything runs on-device.
     -->
     <uses-permission android:name="android.permission.INTERNET" />
-    <!--
-        Lets "Find model on device" (ModelFileScanner) read other apps' Android/data
-        folders - e.g. where Google's AI Edge Gallery stores its downloaded Gemma model -
-        which a plain file picker often cannot browse into. Only requested when the user
-        taps that button; the app works without it (just skip that button).
-    -->
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
-        tools:ignore="ScopedStorage" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />

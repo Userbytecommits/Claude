@@ -6,11 +6,11 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.provider.Settings
 import android.view.Gravity
 import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.localai.assistant.AssistantApplication
 import com.localai.assistant.control.ActionExecutor
 import com.localai.assistant.databinding.ActivityMainBinding
-import com.localai.assistant.llm.ModelFileScanner
 import kotlinx.coroutines.launch
 
 /**
@@ -30,7 +29,6 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var adapter: ChatAdapter
-    private var pendingFindModelScan = false
 
     private val pickModel = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
         if (uri == null) return@registerForActivityResult
@@ -56,7 +54,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnDownloadModel.setOnClickListener { showDownloadModelDialog() }
-        binding.btnFindModel.setOnClickListener { findModelOnDevice() }
 
         binding.btnAccessibility.setOnClickListener {
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
@@ -76,80 +73,38 @@ class MainActivity : AppCompatActivity() {
         binding.txtStatus.text = if (engine.isLoaded) "Model loaded." else getString(com.localai.assistant.R.string.hint_model_missing)
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (pendingFindModelScan && hasAllFilesAccess()) {
-            pendingFindModelScan = false
-            scanForModelFiles()
-        }
-    }
-
-    private fun hasAllFilesAccess(): Boolean =
-        Build.VERSION.SDK_INT < Build.VERSION_CODES.R || Environment.isExternalStorageManager()
-
-    /** Scans for large model files other apps (e.g. AI Edge Gallery) left in shared storage. */
-    private fun findModelOnDevice() {
-        if (!hasAllFilesAccess()) {
-            binding.txtStatus.text = getString(com.localai.assistant.R.string.find_model_need_permission)
-            pendingFindModelScan = true
-            val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
-                data = Uri.parse("package:$packageName")
-            }
-            startActivity(intent)
-            return
-        }
-        scanForModelFiles()
-    }
-
-    private fun scanForModelFiles() {
-        binding.txtStatus.text = "Searching for large model files…"
-        lifecycleScope.launch {
-            val result = ModelFileScanner.scan()
-            val found = when (result) {
-                is ModelFileScanner.ScanResult.NoPermission -> {
-                    binding.txtStatus.text = getString(com.localai.assistant.R.string.find_model_need_permission)
-                    return@launch
-                }
-                is ModelFileScanner.ScanResult.NothingFound -> {
-                    binding.txtStatus.text = getString(
-                        com.localai.assistant.R.string.find_model_none_found,
-                        result.scannedDirs.joinToString(", ").ifBlank { "(no matching folders exist)" },
-                    )
-                    return@launch
-                }
-                is ModelFileScanner.ScanResult.Found -> result.files
-            }
-            AlertDialog.Builder(this@MainActivity)
-                .setTitle(com.localai.assistant.R.string.dialog_find_model_title)
-                .setItems(found.map { "${it.name} (${it.length() / (1024 * 1024)} MB)\n${it.absolutePath}" }.toTypedArray()) { _, index ->
-                    loadModelFromPath(found[index].absolutePath)
-                }
-                .setNegativeButton(android.R.string.cancel, null)
-                .show()
-        }
-    }
-
-    private fun loadModelFromPath(path: String) {
-        binding.txtStatus.text = "Loading model…"
-        lifecycleScope.launch {
-            val result = kotlin.runCatching {
-                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                    AssistantApplication.from(this@MainActivity).engine.loadModelFromPath(path)
-                }
-            }
-            binding.txtStatus.text = if (result.isSuccess) "Model loaded." else "Failed: ${result.exceptionOrNull()?.message}"
-        }
-    }
-
+    /**
+     * Downloads the model straight from Hugging Face - the exact same source and file
+     * layout the official "AI Edge Gallery" app uses - instead of relying on finding a
+     * copy that app already downloaded. Only a Hugging Face access token is needed since
+     * every current Gemma release is a gated model; the repo id/filename are prefilled
+     * with the confirmed Gemma 4 E2B-it values and can be swapped for another variant.
+     */
     private fun showDownloadModelDialog() {
         val padding = (16 * resources.displayMetrics.density).toInt()
-        val urlInput = EditText(this).apply { hint = getString(com.localai.assistant.R.string.dialog_download_url_hint) }
-        val tokenInput = EditText(this).apply { hint = getString(com.localai.assistant.R.string.dialog_download_token_hint) }
+        val info = TextView(this).apply {
+            text = "Downloads directly from Hugging Face (litert-community). " +
+                "Needs a free Hugging Face account: accept the model's license on its page, " +
+                "then create a token under Settings > Access Tokens and paste it below."
+        }
+        val repoInput = EditText(this).apply {
+            hint = "Hugging Face repo id"
+            setText(DEFAULT_MODEL_REPO)
+        }
+        val fileInput = EditText(this).apply {
+            hint = "Model filename"
+            setText(DEFAULT_MODEL_FILE)
+        }
+        val tokenInput = EditText(this).apply {
+            hint = getString(com.localai.assistant.R.string.dialog_download_token_hint)
+        }
         val container = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(padding, padding, padding, padding)
             gravity = Gravity.CENTER_HORIZONTAL
-            addView(urlInput)
+            addView(info)
+            addView(repoInput)
+            addView(fileInput)
             addView(tokenInput)
         }
 
@@ -157,9 +112,13 @@ class MainActivity : AppCompatActivity() {
             .setTitle(com.localai.assistant.R.string.dialog_download_title)
             .setView(container)
             .setPositiveButton(com.localai.assistant.R.string.btn_download_model) { _, _ ->
-                val url = urlInput.text.toString().trim()
+                val repo = repoInput.text.toString().trim()
+                val file = fileInput.text.toString().trim()
                 val token = tokenInput.text.toString().trim().ifBlank { null }
-                if (url.isNotBlank()) downloadModel(url, token)
+                if (repo.isNotBlank() && file.isNotBlank()) {
+                    val url = "https://huggingface.co/$repo/resolve/main/$file?download=true"
+                    downloadModel(url, token)
+                }
             }
             .setNegativeButton(android.R.string.cancel, null)
             .show()
@@ -207,5 +166,12 @@ class MainActivity : AppCompatActivity() {
             adapter.updateLast(result.displayText)
             binding.recyclerChat.scrollToPosition(adapter.itemCount - 1)
         }
+    }
+
+    companion object {
+        // Confirmed from the AI Edge Gallery app's own source: this is the exact
+        // Hugging Face repo/file the "Gemma-4-E2B-it" download button there fetches.
+        private const val DEFAULT_MODEL_REPO = "litert-community/gemma-4-E2B-it-litert-lm"
+        private const val DEFAULT_MODEL_FILE = "gemma-4-E2B-it.litertlm"
     }
 }

@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.localai.assistant"
-        minSdk = 26
+        minSdk = 31 // LiteRT-LM (litertlm-android) requires Android 12+, same as AI Edge Gallery
         targetSdk = 34
         versionCode = 1
         versionName = "0.1.0"
@@ -46,8 +46,9 @@ dependencies {
     implementation("androidx.activity:activity-ktx:1.9.1")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
 
-    // On-device LLM inference (runs Gemma .task models fully locally, no network calls).
-    implementation("com.google.mediapipe:tasks-genai:0.10.24")
+    // On-device LLM inference: Google's LiteRT-LM runtime, the same one the official
+    // "AI Edge Gallery" app uses to run Gemma 4 / Gemma 3n .litertlm models fully locally.
+    implementation("com.google.ai.edge.litertlm:litertlm-android:0.11.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
 }
