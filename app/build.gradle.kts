@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "com.localai.assistant"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.localai.assistant"
         minSdk = 31 // LiteRT-LM (litertlm-android) requires Android 12+, same as AI Edge Gallery
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
     }
@@ -50,5 +50,5 @@ dependencies {
     // "AI Edge Gallery" app uses to run Gemma 4 / Gemma 3n .litertlm models fully locally.
     implementation("com.google.ai.edge.litertlm:litertlm-android:0.11.0")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
 }
