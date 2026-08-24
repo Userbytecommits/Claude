@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "com.localai.assistant"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.localai.assistant"
         minSdk = 31 // LiteRT-LM (litertlm-android) requires Android 12+, same as AI Edge Gallery
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "0.1.0"
     }
