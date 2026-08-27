@@ -1,0 +1,24 @@
+[gd_scene load_steps=4 format=3 uid="uid://dnb7ub8knxw4rm1f"]
+
+[ext_resource type="Script" path="res://scripts/puzzle_tile.gd"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_h8ky7"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_h8ky8"]
+size = Vector2(32, 32)
+
+[node name="PuzzleTile" type="StaticBody2D"]
+script = ExtResource("Script" path="res://scripts/puzzle_tile.gd")
+add_to_group("puzzles")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(2, 2)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_h8ky7")
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectangleShape2D_h8ky8")

@@ -1,0 +1,57 @@
+; Engine configuration for Godot 4.7.2
+; https://docs.godotengine.org/en/stable/tutorials/projects/project_settings.html
+
+config_version=5
+
+[application]
+
+config/name="Puzzle Realm"
+config/version="0.1.0"
+run/main_scene="res://scenes/ui/main_menu.tscn"
+config/features=PackedStringArray("4.7", "mobile")
+config/icon="res://icon.png"
+
+[display]
+
+window/size/viewport_width=540
+window/size/viewport_height=960
+window/size/mode=2
+window/handheld_mode=true
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep_height"
+window/vsync_mode=1
+
+[input]
+
+ui_left={
+"deadzone": 0.5,
+"events": [Key( keycode=65, physical_keycode=0, unicode=0, echo=false, pressed=false, keycode_with_modifiers=0 ), JoyAxis( axis=0, value=-1.0 )]
+}
+ui_right={
+"deadzone": 0.5,
+"events": [Key( keycode=68, physical_keycode=0, unicode=0, echo=false, pressed=false, keycode_with_modifiers=0 ), JoyAxis( axis=0, value=1.0 )]
+}
+ui_up={
+"deadzone": 0.5,
+"events": [Key( keycode=87, physical_keycode=0, unicode=0, echo=false, pressed=false, keycode_with_modifiers=0 ), JoyAxis( axis=1, value=-1.0 )]
+}
+ui_down={
+"deadzone": 0.5,
+"events": [Key( keycode=83, physical_keycode=0, unicode=0, echo=false, pressed=false, keycode_with_modifiers=0 ), JoyAxis( axis=1, value=1.0 )]
+}
+ui_accept={
+"deadzone": 0.5,
+"events": [Key( keycode=32, physical_keycode=0, unicode=0, echo=false, pressed=false, keycode_with_modifiers=0 )]
+}
+
+[physics]
+
+2d/default_gravity=980
+2d/default_gravity_vector=Vector2(0, 1)
+
+[rendering]
+
+textures/canvas_textures/default_texture_filter=0
+2d/snap/snap_2d_vertices_to_pixel=true
+2d/snap/snap_2d_transforms_to_pixel=true
+quality/driver/driver_name="vulkan"

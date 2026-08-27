@@ -1,0 +1,59 @@
+[gd_scene load_steps=9 format=3 uid="uid://c8g3rjjy0nc4k0ie"]
+
+[ext_resource type="PackedScene" path="res://scenes/characters/player.tscn"]
+[ext_resource type="PackedScene" path="res://scenes/characters/enemy.tscn"]
+[ext_resource type="PackedScene" path="res://scenes/levels/puzzle_tile.tscn"]
+[ext_resource type="PackedScene" path="res://scenes/levels/door.tscn"]
+[ext_resource type="Script" path="res://scripts/game_manager.gd"]
+[ext_resource type="Script" path="res://scripts/ui.gd"]
+[ext_resource type="Script" path="res://scripts/level_setup.gd"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5k9ej"]
+size = Vector2(2160, 60)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5k9ek"]
+size = Vector2(1080, 60)
+
+[node name="Level2" type="Node2D"]
+script = ExtResource("res://scripts/level_setup.gd")
+
+[node name="GameManager" type="Node" parent="."]
+script = ExtResource("res://scripts/game_manager.gd")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="UI" type="Node" parent="CanvasLayer"]
+script = ExtResource("res://scripts/ui.gd")
+
+[node name="Ground" type="StaticBody2D" parent="."]
+position = Vector2(0, 900)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground"]
+shape = SubResource("RectangleShape2D_5k9ej")
+
+[node name="Player" parent="." instance=ExtResource("res://scenes/characters/player.tscn")]
+position = Vector2(270, 600)
+
+[node name="Enemy1" parent="." instance=ExtResource("res://scenes/characters/enemy.tscn")]
+position = Vector2(540, 650)
+
+[node name="Enemy2" parent="." instance=ExtResource("res://scenes/characters/enemy.tscn")]
+position = Vector2(810, 550)
+
+[node name="Enemy3" parent="." instance=ExtResource("res://scenes/characters/enemy.tscn")]
+position = Vector2(1080, 650)
+
+[node name="PuzzleTile1" parent="." instance=ExtResource("res://scenes/levels/puzzle_tile.tscn")]
+position = Vector2(405, 700)
+
+[node name="PuzzleTile2" parent="." instance=ExtResource("res://scenes/levels/puzzle_tile.tscn")]
+position = Vector2(675, 600)
+
+[node name="PuzzleTile3" parent="." instance=ExtResource("res://scenes/levels/puzzle_tile.tscn")]
+position = Vector2(945, 700)
+
+[node name="Door1" parent="." instance=ExtResource("res://scenes/levels/door.tscn")]
+position = Vector2(1350, 700)
+
+[node name="Door2" parent="." instance=ExtResource("res://scenes/levels/door.tscn")]
+position = Vector2(1350, 400)

@@ -1,0 +1,68 @@
+[gd_scene load_steps=9 format=3 uid="uid://c8g3rjjy0nc4k0id"]
+
+[ext_resource type="PackedScene" path="res://scenes/characters/player.tscn"]
+[ext_resource type="PackedScene" path="res://scenes/characters/enemy.tscn"]
+[ext_resource type="PackedScene" path="res://scenes/levels/puzzle_tile.tscn"]
+[ext_resource type="PackedScene" path="res://scenes/levels/door.tscn"]
+[ext_resource type="Script" path="res://scripts/game_manager.gd"]
+[ext_resource type="Script" path="res://scripts/ui.gd"]
+[ext_resource type="Script" path="res://scripts/level_setup.gd"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5k9ej"]
+size = Vector2(2160, 60)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5k9ek"]
+size = Vector2(1080, 60)
+
+[node name="Level1" type="Node2D"]
+script = ExtResource("res://scripts/level_setup.gd")
+
+[node name="GameManager" type="Node" parent="."]
+script = ExtResource("res://scripts/game_manager.gd")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="UI" type="Node" parent="CanvasLayer"]
+script = ExtResource("res://scripts/ui.gd")
+
+[node name="Ground" type="StaticBody2D" parent="."]
+position = Vector2(0, 900)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground"]
+shape = SubResource("RectangleShape2D_5k9ej")
+
+[node name="Player" parent="." instance=ExtResource("res://scenes/characters/player.tscn")]
+position = Vector2(270, 720)
+
+[node name="Enemy1" parent="." instance=ExtResource("res://scenes/characters/enemy.tscn")]
+position = Vector2(640, 750)
+
+[node name="Enemy2" parent="." instance=ExtResource("res://scenes/characters/enemy.tscn")]
+position = Vector2(1080, 750)
+
+[node name="PuzzleTile1" parent="." instance=ExtResource("res://scenes/levels/puzzle_tile.tscn")]
+position = Vector2(405, 750)
+
+[node name="PuzzleTile2" parent="." instance=ExtResource("res://scenes/levels/puzzle_tile.tscn")]
+position = Vector2(810, 750)
+
+[node name="Door1" parent="." instance=ExtResource("res://scenes/levels/door.tscn")]
+position = Vector2(1350, 750)
+
+[node name="WallLeft" type="StaticBody2D" parent="."]
+position = Vector2(-30, 450)
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="WallLeft"]
+shape = SubResource("RectangleShape2D_5k9ek")
+
+[node name="WallRight" type="StaticBody2D" parent="."]
+position = Vector2(1350, 450)
+
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="WallRight"]
+shape = SubResource("RectangleShape2D_5k9ek")
+
+[node name="GoalArea" type="Area2D" parent="."]
+position = Vector2(1350, 700)
+
+[node name="CollisionShape2D4" type="CollisionShape2D" parent="GoalArea"]
+shape = SubResource("RectangleShape2D_5k9ek")

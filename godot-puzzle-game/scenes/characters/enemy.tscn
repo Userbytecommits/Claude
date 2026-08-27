@@ -1,0 +1,25 @@
+[gd_scene load_steps=3 format=3 uid="uid://bx2vdpfvcmxaw7q2"]
+
+[ext_resource type="Script" path="res://scripts/enemy.gd"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1h5j8"]
+size = Vector2(32, 32)
+
+[node name="Enemy" type="CharacterBody2D"]
+script = ExtResource("Script" path="res://scripts/enemy.gd")
+add_to_group("enemies")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(2, 2)
+offset = Vector2(0, -16)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_1h5j8")
+
+[node name="AttackTimer" type="Timer" parent="."]
+wait_time = 1.0
+
+[node name="DamageArea" type="Area2D" parent="."]
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="DamageArea"]
+shape = SubResource("RectangleShape2D_1h5j8")

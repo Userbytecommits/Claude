@@ -1,0 +1,27 @@
+# Godot
+*.import
+export.cfg
+export/
+.godot/
+user://
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Builds
+*.exe
+*.apk
+*.ipa
+*.pck
+
+# Temporary files
+*.tmp
+*.bak
