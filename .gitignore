@@ -1,0 +1,3 @@
+# Local Godot engine binary downloaded for headless validation/testing.
+# Not part of the game project itself — see godot-puzzle-game/README.md.
+godot-bin/
