@@ -1,20 +1,16 @@
 [gd_scene load_steps=3 format=3 uid="uid://cq8xtqhpx5k0q8g1"]
 
-[ext_resource type="Script" path="res://scripts/door.gd"]
+[ext_resource type="Script" path="res://scripts/door.gd" id="1_dr001"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_u7p2k"]
-size = Vector2(32, 64)
+size = Vector2(56, 128)
 
-[node name="Door" type="StaticBody2D"]
-script = ExtResource("Script" path="res://scripts/door.gd")
-add_to_group("doors")
+[node name="Door" type="StaticBody2D" groups=["doors"]]
+script = ExtResource("1_dr001")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-scale = Vector2(2, 2)
-offset = Vector2(0, -16)
+position = Vector2(0, -64)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -64)
 shape = SubResource("RectangleShape2D_u7p2k")
-offset = Vector2(0, -16)
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]

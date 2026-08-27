@@ -1,25 +1,32 @@
-[gd_scene load_steps=3 format=3 uid="uid://bx2vdpfvcmxaw7q2"]
+[gd_scene load_steps=4 format=3 uid="uid://bx2vdpfvcmxaw7q2"]
 
-[ext_resource type="Script" path="res://scripts/enemy.gd"]
+[ext_resource type="Script" path="res://scripts/enemy.gd" id="1_en001"]
+[ext_resource type="Shader" path="res://shaders/damage.gdshader" id="2_shader"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1h5j8"]
-size = Vector2(32, 32)
+size = Vector2(44, 36)
 
-[node name="Enemy" type="CharacterBody2D"]
-script = ExtResource("Script" path="res://scripts/enemy.gd")
-add_to_group("enemies")
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_en1"]
+shader = ExtResource("2_shader")
+shader_parameter/flash_amount = 0.0
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-scale = Vector2(2, 2)
-offset = Vector2(0, -16)
+[node name="Enemy" type="CharacterBody2D" groups=["enemies"]]
+collision_layer = 4
+collision_mask = 1
+script = ExtResource("1_en001")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+material = SubResource("ShaderMaterial_en1")
+position = Vector2(0, -18)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -18)
 shape = SubResource("RectangleShape2D_1h5j8")
 
-[node name="AttackTimer" type="Timer" parent="."]
-wait_time = 1.0
-
 [node name="DamageArea" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 2
 
 [node name="CollisionShape2D2" type="CollisionShape2D" parent="DamageArea"]
+position = Vector2(0, -18)
 shape = SubResource("RectangleShape2D_1h5j8")

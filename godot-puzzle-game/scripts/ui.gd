@@ -1,37 +1,27 @@
 extends CanvasLayer
 class_name GameUI
 
-@onready var health_label = Label.new()
-@onready var score_label = Label.new()
-@onready var puzzle_label = Label.new()
+const HEART_FULL = preload("res://assets/ui/heart_full.png")
+const HEART_EMPTY = preload("res://assets/ui/heart_empty.png")
+
+var max_hearts = 3
+var heart_icons: Array[TextureRect] = []
+
+@onready var hearts_box = $Margin/TopRow/HeartsBox
+@onready var score_label = $Margin/TopRow/ScoreBox/ScoreLabel
+@onready var puzzle_label = $Margin/TopRow/PuzzleBox/PuzzleLabel
 
 func _ready():
-	setup_ui()
-
-func setup_ui():
-	# Health Label
-	health_label.text = "HP: 3/3"
-	health_label.add_theme_font_size_override("font_size", 32)
-	add_child(health_label)
-	health_label.position = Vector2(20, 20)
-
-	# Score Label
-	score_label.text = "Score: 0"
-	score_label.add_theme_font_size_override("font_size", 28)
-	add_child(score_label)
-	score_label.position = Vector2(20, 70)
-
-	# Puzzle Label
-	puzzle_label.text = "Puzzles: 0"
-	puzzle_label.add_theme_font_size_override("font_size", 28)
-	add_child(puzzle_label)
-	puzzle_label.position = Vector2(20, 120)
+	for child in hearts_box.get_children():
+		if child is TextureRect:
+			heart_icons.append(child)
 
 func update_health(health: int):
-	health_label.text = "HP: %d/3" % health
+	for i in range(heart_icons.size()):
+		heart_icons[i].texture = HEART_FULL if i < health else HEART_EMPTY
 
 func update_score(score: int):
-	score_label.text = "Score: %d" % score
+	score_label.text = str(score)
 
 func update_puzzles(count: int):
-	puzzle_label.text = "Puzzles: %d" % count
+	puzzle_label.text = str(count)

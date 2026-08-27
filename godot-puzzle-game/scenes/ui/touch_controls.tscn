@@ -1,0 +1,35 @@
+[gd_scene load_steps=6 format=3 uid="uid://c3n7h2m4x8vqk1la"]
+
+[ext_resource type="Script" path="res://scripts/touch_controls.gd" id="1_tc001"]
+[ext_resource type="Texture2D" path="res://assets/ui/btn_left.png" id="2_left"]
+[ext_resource type="Texture2D" path="res://assets/ui/btn_right.png" id="3_right"]
+[ext_resource type="Texture2D" path="res://assets/ui/btn_jump.png" id="4_jump"]
+[ext_resource type="Texture2D" path="res://assets/ui/btn_dash.png" id="5_dash"]
+
+[node name="TouchControls" type="CanvasLayer"]
+layer = 10
+script = ExtResource("1_tc001")
+
+[node name="LeftButton" type="TouchScreenButton" parent="."]
+position = Vector2(50, 780)
+texture_normal = ExtResource("2_left")
+action = "ui_left"
+visibility_mode = 1
+
+[node name="RightButton" type="TouchScreenButton" parent="."]
+position = Vector2(210, 780)
+texture_normal = ExtResource("3_right")
+action = "ui_right"
+visibility_mode = 1
+
+[node name="JumpButton" type="TouchScreenButton" parent="."]
+position = Vector2(390, 780)
+texture_normal = ExtResource("4_jump")
+action = "ui_accept"
+visibility_mode = 1
+
+[node name="DashButton" type="TouchScreenButton" parent="."]
+position = Vector2(390, 640)
+texture_normal = ExtResource("5_dash")
+action = "dash"
+visibility_mode = 1

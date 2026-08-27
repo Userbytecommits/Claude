@@ -1,22 +1,75 @@
-[gd_scene load_steps=3 format=3 uid="uid://cmpbh45vbqaaq0l4"]
+[gd_scene load_steps=10 format=3 uid="uid://cmpbh45vbqaaq0l4"]
 
-[ext_resource type="Script" path="res://scripts/player.gd"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="1_pl001"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player_idle.png" id="2_idle"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player_run1.png" id="3_run1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player_run2.png" id="4_run2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/player_jump.png" id="5_jump"]
+[ext_resource type="Shader" path="res://shaders/player.gdshader" id="6_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_pl1"]
+shader = ExtResource("6_shader")
+shader_parameter/pulse_speed = 2.0
+shader_parameter/pulse_intensity = 0.06
+shader_parameter/damage_flash = 0.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_fkv4t"]
-size = Vector2(32, 32)
+size = Vector2(32, 56)
 
-[node name="Player" type="CharacterBody2D"]
-script = ExtResource("Script" path="res://scripts/player.gd")
-add_to_group("player")
+[sub_resource type="SpriteFrames" id="SpriteFrames_p1"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_idle")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("3_run1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_run2")
+}],
+"loop": true,
+"name": &"run",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("5_jump")
+}],
+"loop": true,
+"name": &"jump",
+"speed": 5.0
+}]
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
-scale = Vector2(2, 2)
-offset = Vector2(0, -16)
+[node name="Player" type="CharacterBody2D" groups=["player"]]
+collision_layer = 2
+collision_mask = 1
+script = ExtResource("1_pl001")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+material = SubResource("ShaderMaterial_pl1")
+position = Vector2(0, -26)
+sprite_frames = SubResource("SpriteFrames_p1")
+animation = &"idle"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -28)
 shape = SubResource("RectangleShape2D_fkv4t")
 
 [node name="HurtTimer" type="Timer" parent="."]
-wait_time = 0.5
+wait_time = 0.6
+one_shot = true
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+[node name="DashCooldownTimer" type="Timer" parent="."]
+wait_time = 0.5
+one_shot = true
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position_smoothing_enabled = true
+position_smoothing_speed = 6.0
+zoom = Vector2(1.6, 1.6)
