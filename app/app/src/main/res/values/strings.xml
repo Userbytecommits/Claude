@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">ClaudeControl</string>
+    <string name="accessibility_service_description">Erlaubt Claude, Bildschirminhalte zu lesen und Aktionen (Tap, Swipe, Text) auszuführen.</string>
+</resources>
