@@ -48,6 +48,7 @@ Nutze "done" wenn das Ziel erreicht ist. Nutze "target_index" passend zur gelief
         history: List<String>,
         callback: ResultCallback
     ) {
+        val isOpenRouter = apiKey.startsWith("sk-or-") || apiKey.startsWith("sk-")
         val userContent = JSONObject().apply {
             put("goal", goal)
             put("recent_actions", JSONArray(history.takeLast(5)))
@@ -67,14 +68,21 @@ Nutze "done" wenn das Ziel erreicht ist. Nutze "target_index" passend zur gelief
         }
 
         val mediaType = "application/json".toMediaType()
+        val url = if (isOpenRouter) "https://openrouter.ai/api/v1/messages"
+                  else "https://api.anthropic.com/v1/messages"
+
         val requestBuilder = Request.Builder()
-            .url("https://api.anthropic.com/v1/messages")
-            .addHeader("x-api-key", apiKey)
-            .addHeader("anthropic-version", "2023-06-01")
+            .url(url)
+            .addHeader("authorization", "Bearer $apiKey")
             .addHeader("content-type", "application/json")
 
-        if (!workspaceId.isNullOrBlank()) {
-            requestBuilder.addHeader("anthropic-workspace-id", workspaceId)
+        if (!isOpenRouter) {
+            requestBuilder.addHeader("anthropic-version", "2023-06-01")
+            if (!workspaceId.isNullOrBlank()) {
+                requestBuilder.addHeader("anthropic-workspace-id", workspaceId)
+            }
+        } else {
+            requestBuilder.addHeader("HTTP-Referer", "https://claudecontrol.app")
         }
 
         val request = requestBuilder

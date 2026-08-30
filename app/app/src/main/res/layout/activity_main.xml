@@ -7,7 +7,7 @@
 
     <EditText
         android:id="@+id/apiKeyInput"
-        android:hint="Anthropic API Key (sk-ant-...)"
+        android:hint="API Key: Anthropic (sk-ant-...) oder OpenRouter (sk-or-...)"
         android:inputType="textPassword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
