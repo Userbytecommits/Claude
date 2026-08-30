@@ -1,0 +1,24 @@
+# Gradle
+.gradle/
+build/
+gradle-app.setting
+
+# Build artifacts
+*.apk
+*.aab
+*.apks
+
+# Android Studio
+.idea/
+*.iml
+*.iws
+*.ipr
+local.properties
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
