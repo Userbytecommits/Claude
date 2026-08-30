@@ -39,6 +39,7 @@ class ControlAccessibilityService : AccessibilityService() {
     fun runStep() {
         val apiKey = AppState.loadApiKey(applicationContext)
         val goal = AppState.loadGoal(applicationContext)
+        val workspaceId = AppState.loadWorkspaceId(applicationContext)
         if (apiKey.isBlank() || goal.isBlank()) {
             AppState.log("Fehler: API-Key oder Ziel fehlt.")
             return
@@ -46,7 +47,7 @@ class ControlAccessibilityService : AccessibilityService() {
         val elements = buildElementTree()
         AppState.log("Elemente erfasst: ${elements.length()}")
 
-        ClaudeApiClient.requestNextAction(apiKey, goal, elements, history, object : ClaudeApiClient.ResultCallback {
+        ClaudeApiClient.requestNextAction(apiKey, workspaceId, goal, elements, history, object : ClaudeApiClient.ResultCallback {
             override fun onResult(action: JSONObject) {
                 handler.post { executeAction(action) }
             }

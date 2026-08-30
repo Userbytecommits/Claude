@@ -42,6 +42,7 @@ Nutze "done" wenn das Ziel erreicht ist. Nutze "target_index" passend zur gelief
 
     fun requestNextAction(
         apiKey: String,
+        workspaceId: String?,
         goal: String,
         elements: JSONArray,
         history: List<String>,
@@ -66,11 +67,17 @@ Nutze "done" wenn das Ziel erreicht ist. Nutze "target_index" passend zur gelief
         }
 
         val mediaType = "application/json".toMediaType()
-        val request = Request.Builder()
+        val requestBuilder = Request.Builder()
             .url("https://api.anthropic.com/v1/messages")
             .addHeader("x-api-key", apiKey)
             .addHeader("anthropic-version", "2023-06-01")
             .addHeader("content-type", "application/json")
+
+        if (!workspaceId.isNullOrBlank()) {
+            requestBuilder.addHeader("anthropic-workspace-id", workspaceId)
+        }
+
+        val request = requestBuilder
             .post(body.toString().toRequestBody(mediaType))
             .build()
 

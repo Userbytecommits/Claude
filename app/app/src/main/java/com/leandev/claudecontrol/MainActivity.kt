@@ -16,10 +16,12 @@ class MainActivity : AppCompatActivity() {
 
         val apiKeyInput = findViewById<EditText>(R.id.apiKeyInput)
         val goalInput = findViewById<EditText>(R.id.goalInput)
+        val workspaceIdInput = findViewById<EditText>(R.id.workspaceIdInput)
         val logView = findViewById<TextView>(R.id.logView)
 
         apiKeyInput.setText(AppState.loadApiKey(this))
         goalInput.setText(AppState.loadGoal(this))
+        workspaceIdInput.setText(AppState.loadWorkspaceId(this))
 
         AppState.logCallback = { msg ->
             runOnUiThread {
@@ -28,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.saveButton).setOnClickListener {
-            AppState.save(this, apiKeyInput.text.toString().trim(), goalInput.text.toString().trim())
+            AppState.save(this, apiKeyInput.text.toString().trim(), goalInput.text.toString().trim(), workspaceIdInput.text.toString().trim())
             AppState.log("Gespeichert.")
         }
 
@@ -37,7 +39,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.stepButton).setOnClickListener {
-            AppState.save(this, apiKeyInput.text.toString().trim(), goalInput.text.toString().trim())
+            AppState.save(this, apiKeyInput.text.toString().trim(), goalInput.text.toString().trim(), workspaceIdInput.text.toString().trim())
             val service = AppState.serviceInstance
             if (service == null) {
                 AppState.log("Fehler: Bedienungshilfen-Dienst nicht aktiv.")
@@ -49,7 +51,7 @@ class MainActivity : AppCompatActivity() {
         val autoButton = findViewById<Button>(R.id.autoButton)
         var running = false
         autoButton.setOnClickListener {
-            AppState.save(this, apiKeyInput.text.toString().trim(), goalInput.text.toString().trim())
+            AppState.save(this, apiKeyInput.text.toString().trim(), goalInput.text.toString().trim(), workspaceIdInput.text.toString().trim())
             val service = AppState.serviceInstance
             if (service == null) {
                 AppState.log("Fehler: Bedienungshilfen-Dienst nicht aktiv.")
