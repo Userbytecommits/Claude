@@ -56,7 +56,7 @@ Nutze "done" wenn das Ziel erreicht ist. Nutze "target_index" passend zur gelief
         }
 
         val body = JSONObject().apply {
-            put("model", AppState.MODEL)
+            put("model", AppState.getModel(apiKey))
             put("max_tokens", 500)
             put("system", SYSTEM_PROMPT)
             put("messages", JSONArray().put(

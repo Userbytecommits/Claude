@@ -12,6 +12,12 @@ object AppState {
     private const val KEY_API = "api_key"
     private const val KEY_GOAL = "goal"
     private const val KEY_WORKSPACE = "workspace_id"
+
+    fun getModel(apiKey: String): String {
+        val isOpenRouter = apiKey.startsWith("sk-or-") || (apiKey.startsWith("sk-") && !apiKey.startsWith("sk-ant-"))
+        return if (isOpenRouter) "gpt-3.5-turbo" else "claude-sonnet-5"
+    }
+
     const val MODEL = "claude-sonnet-5"
 
     var logCallback: ((String) -> Unit)? = null
