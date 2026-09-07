@@ -32,12 +32,6 @@ jobs:
       - name: Flutter pub get
         run: flutter pub get
 
-      - name: Generate Gradle wrapper
-        working-directory: alarm_app/android
-        run: |
-          gradle wrapper --gradle-version 8.7
-          chmod +x gradlew
-
       - name: Build release APK
         run: flutter build apk --release
 
