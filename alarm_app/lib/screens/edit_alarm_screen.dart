@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../models/alarm_model.dart';
 import '../widgets/weekday_selector.dart';
@@ -20,6 +21,9 @@ class _EditAlarmScreenState extends State<EditAlarmScreen> {
   late TextEditingController _labelController;
   late Set<int> _repeatDays;
   late bool _headphonesOnly;
+  late int _snoozeMinutes;
+
+  static const _snoozeOptions = [3, 5, 9, 10, 15, 20, 30];
 
   @override
   void initState() {
@@ -28,6 +32,7 @@ class _EditAlarmScreenState extends State<EditAlarmScreen> {
     _labelController = TextEditingController(text: widget.alarm.label);
     _repeatDays = Set<int>.from(widget.alarm.repeatDays);
     _headphonesOnly = widget.alarm.headphonesOnly;
+    _snoozeMinutes = widget.alarm.snoozeMinutes;
   }
 
   @override
@@ -39,23 +44,27 @@ class _EditAlarmScreenState extends State<EditAlarmScreen> {
   Future<void> _pickTime() async {
     final picked = await showTimePicker(context: context, initialTime: _time);
     if (picked != null) {
+      HapticFeedback.selectionClick();
       setState(() => _time = picked);
     }
   }
 
   void _save() {
+    HapticFeedback.mediumImpact();
     final updated = widget.alarm.copyWith(
       hour: _time.hour,
       minute: _time.minute,
       label: _labelController.text.trim(),
       repeatDays: _repeatDays,
       headphonesOnly: _headphonesOnly,
+      snoozeMinutes: _snoozeMinutes,
       enabled: true,
     );
     Navigator.of(context).pop(updated);
   }
 
   void _delete() {
+    HapticFeedback.mediumImpact();
     Navigator.of(context).pop(const _DeleteResult());
   }
 
@@ -78,9 +87,13 @@ class _EditAlarmScreenState extends State<EditAlarmScreen> {
           Center(
             child: TextButton(
               onPressed: _pickTime,
-              child: Text(
-                _time.format(context),
-                style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w300),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: Text(
+                  _time.format(context),
+                  key: ValueKey(_time.format(context)),
+                  style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w300),
+                ),
               ),
             ),
           ),
@@ -98,7 +111,10 @@ class _EditAlarmScreenState extends State<EditAlarmScreen> {
           const SizedBox(height: 8),
           WeekdaySelector(
             selectedDays: _repeatDays,
-            onChanged: (days) => setState(() => _repeatDays = days),
+            onChanged: (days) {
+              HapticFeedback.selectionClick();
+              setState(() => _repeatDays = days);
+            },
           ),
           const SizedBox(height: 8),
           Text(
@@ -118,7 +134,26 @@ class _EditAlarmScreenState extends State<EditAlarmScreen> {
               'Lautsprecher.',
             ),
             value: _headphonesOnly,
-            onChanged: (value) => setState(() => _headphonesOnly = value),
+            onChanged: (value) {
+              HapticFeedback.selectionClick();
+              setState(() => _headphonesOnly = value);
+            },
+          ),
+          const Divider(height: 32),
+          const Text('Schlummerdauer', style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            children: _snoozeOptions.map((minutes) {
+              return ChoiceChip(
+                label: Text('$minutes Min.'),
+                selected: _snoozeMinutes == minutes,
+                onSelected: (_) {
+                  HapticFeedback.selectionClick();
+                  setState(() => _snoozeMinutes = minutes);
+                },
+              );
+            }).toList(),
           ),
           const SizedBox(height: 32),
           FilledButton(

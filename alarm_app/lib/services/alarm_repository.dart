@@ -76,7 +76,7 @@ class AlarmRepository {
       // Kernstück der gewünschten Funktion: Ton geht bevorzugt an
       // verbundene Kopfhörer/Bluetooth, nicht zusätzlich an den Lautsprecher.
       preferConnectedAudioDevice: alarm.headphonesOnly,
-      androidSnoozeDuration: const Duration(minutes: 9),
+      androidSnoozeDuration: Duration(minutes: alarm.snoozeMinutes),
       notificationSettings: NotificationSettings(
         title: alarm.label.isEmpty ? 'Wecker' : alarm.label,
         body: 'Alarm um '
@@ -92,6 +92,19 @@ class AlarmRepository {
       ),
     );
     await Alarm.set(alarmSettings: settings);
+  }
+
+  /// Zeitpunkt des nächsten aktiven Alarms aus der Liste, oder `null` wenn
+  /// keiner aktiviert ist.
+  DateTime? nextActiveOccurrence(List<AlarmModel> alarms) {
+    DateTime? earliest;
+    for (final alarm in alarms.where((a) => a.enabled)) {
+      final occurrence = nextOccurrence(alarm);
+      if (earliest == null || occurrence.isBefore(earliest)) {
+        earliest = occurrence;
+      }
+    }
+    return earliest;
   }
 
   Future<void> cancelAlarm(int id) => Alarm.stop(id);

@@ -11,6 +11,7 @@ class AlarmModel {
     Set<int>? repeatDays,
     this.enabled = true,
     this.headphonesOnly = true,
+    this.snoozeMinutes = 9,
   }) : repeatDays = repeatDays ?? <int>{};
 
   final int id;
@@ -28,6 +29,9 @@ class AlarmModel {
   /// abgespielt, statt zusätzlich über den Lautsprecher.
   bool headphonesOnly;
 
+  /// Dauer der Schlummerfunktion in Minuten.
+  int snoozeMinutes;
+
   bool get isRepeating => repeatDays.isNotEmpty;
 
   AlarmModel copyWith({
@@ -37,6 +41,7 @@ class AlarmModel {
     Set<int>? repeatDays,
     bool? enabled,
     bool? headphonesOnly,
+    int? snoozeMinutes,
   }) {
     return AlarmModel(
       id: id,
@@ -46,6 +51,7 @@ class AlarmModel {
       repeatDays: repeatDays ?? Set<int>.from(this.repeatDays),
       enabled: enabled ?? this.enabled,
       headphonesOnly: headphonesOnly ?? this.headphonesOnly,
+      snoozeMinutes: snoozeMinutes ?? this.snoozeMinutes,
     );
   }
 
@@ -57,6 +63,7 @@ class AlarmModel {
         'repeatDays': repeatDays.toList(),
         'enabled': enabled,
         'headphonesOnly': headphonesOnly,
+        'snoozeMinutes': snoozeMinutes,
       };
 
   factory AlarmModel.fromJson(Map<String, dynamic> json) => AlarmModel(
@@ -69,5 +76,6 @@ class AlarmModel {
             .toSet(),
         enabled: json['enabled'] as bool? ?? true,
         headphonesOnly: json['headphonesOnly'] as bool? ?? true,
+        snoozeMinutes: json['snoozeMinutes'] as int? ?? 9,
       );
 }

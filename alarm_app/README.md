@@ -15,12 +15,16 @@ Technisch nutzt das App die `preferConnectedAudioDevice`-Option des
 
 ## Funktionsumfang
 
-- Alarme anlegen, bearbeiten, löschen
+- Alarme anlegen, bearbeiten, löschen (auch per Wischen nach rechts in der Liste, mit "Rückgängig")
 - Uhrzeit, Bezeichnung, Wiederholung an einzelnen Wochentagen
 - Ein-/Ausschalten pro Alarm
-- Schlummern (9 Minuten) und Stopp im Klingel-Bildschirm bzw. über die Benachrichtigung
-- Alarm klingelt auch bei gesperrtem Bildschirm (Vollbild-Benachrichtigung)
+- Schlummerdauer pro Alarm wählbar (3–30 Minuten) und Stopp im Klingel-Bildschirm bzw. über die Benachrichtigung
+- Alarm klingelt auch bei gesperrtem Bildschirm (Vollbild-Benachrichtigung) und auch wenn die App komplett geschlossen ist
 - Pro Alarm einstellbar: "Nur über Kopfhörer" ein/aus
+- Anzeige "Nächster Wecker in X Std. Y Min." auf der Startseite
+- Dark Mode (System / Hell / Dunkel, unter dem Zahnrad-Symbol)
+- Haptisches Feedback bei Interaktionen, dezente Animationen (Puls-Icon beim Klingeln, Zeit-Wechsel)
+- Eigenes Launcher-Icon (Uhr mit Kopfhörer-Motiv statt Platzhalter)
 
 ## App bauen und aufs Handy bringen
 

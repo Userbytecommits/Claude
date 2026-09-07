@@ -7,12 +7,14 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'screens/home_screen.dart';
 import 'screens/ring_screen.dart';
+import 'services/theme_service.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Alarm.init();
+  await ThemeService.instance.load();
   runApp(const WeckerApp());
 }
 
@@ -58,14 +60,26 @@ class _WeckerAppState extends State<WeckerApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      navigatorKey: navigatorKey,
-      title: 'Wecker',
-      theme: ThemeData(
-        colorSchemeSeed: Colors.indigo,
-        useMaterial3: true,
-      ),
-      home: const HomeScreen(),
+    return AnimatedBuilder(
+      animation: ThemeService.instance,
+      builder: (context, _) {
+        return MaterialApp(
+          navigatorKey: navigatorKey,
+          title: 'Wecker',
+          themeMode: ThemeService.instance.mode,
+          theme: ThemeData(
+            colorSchemeSeed: Colors.indigo,
+            brightness: Brightness.light,
+            useMaterial3: true,
+          ),
+          darkTheme: ThemeData(
+            colorSchemeSeed: Colors.indigo,
+            brightness: Brightness.dark,
+            useMaterial3: true,
+          ),
+          home: const HomeScreen(),
+        );
+      },
     );
   }
 }
