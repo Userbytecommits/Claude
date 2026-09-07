@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:alarm/alarm.dart';
+import 'package:alarm/utils/alarm_set.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'screens/home_screen.dart';
 import 'screens/ring_screen.dart';
@@ -32,9 +34,11 @@ class _WeckerAppState extends State<WeckerApp> {
   }
 
   Future<void> _requestPermissions() async {
-    final hasPermission = await Alarm.checkNotificationPermission();
-    if (!hasPermission) {
-      await Alarm.requestNotificationPermission();
+    if (!await Permission.notification.status.isGranted) {
+      await Permission.notification.request();
+    }
+    if (!await Permission.scheduleExactAlarm.status.isGranted) {
+      await Permission.scheduleExactAlarm.request();
     }
   }
 
